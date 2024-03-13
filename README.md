@@ -230,7 +230,7 @@ Then, we will override the SetInput() function to apply our input. Here, we will
 ```cs
 public override BoxInputPayload SetInput()
 {
-    _rigidbody.AddForce(new Vector3(inputPayload.GetHorizontal(), 0f, inputPayload.GetVertical()) * 100f);
+    _rigidbody.AddForce(new Vector3(inputPayload.horizontal, 0f, inputPayload.vertical) * 100f);
 }
 ```
 
@@ -258,11 +258,11 @@ public override void SetState(BoxStatePayload statePayload) {
 # Defining the conditions for a Reconcile
 We must define what conditions constitute a desync that requires a correction. We will do this by overriding the ShouldReconciliate() method.
 It gives us two parameters: the latest received server State (which is in the past due to latency) and the client state that happened around that time.
-```c#
+```cs
 public override bool ShouldReconciliate(BoxStatePayload latestServerState, BoxStatePayload ClientState) {
     // We will get the error in rotation and position between the server and client states
     float positionError = Vector3.Distance(latestServerState.position, ClientState.position);
-    float rotDif = 1f - Quaternion.Dot(latestServerState.GetRot(), ClientState.GetRot());
+    float rotDif = 1f - Quaternion.Dot(latestServerState.rotation, ClientState.rotation);
 
     //If the error is above a certain threshold, we will tell the client to correct itself to sync with the server
     if (positionError > 0.01f || rotDif > 0.001f) {
