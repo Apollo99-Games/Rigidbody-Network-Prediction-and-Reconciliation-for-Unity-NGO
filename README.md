@@ -249,7 +249,7 @@ public override BoxStatePayload GetState() {
 
 public override void SetState(BoxStatePayload statePayload) {
     _rigidbody.position = statePayload.position;
-    _rigidbody.rotation = statePayload.GetRot();
+    _rigidbody.rotation = statePayload.rotation;
     _rigidbody.velocity = statePayload.velocity;
     _rigidbody.angularVelocity = statePayload.angularVelocity;
 }
