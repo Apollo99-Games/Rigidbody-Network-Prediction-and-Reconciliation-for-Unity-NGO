@@ -258,7 +258,7 @@ public override void SetState(BoxStatePayload statePayload) {
 # Defining the conditions for a Reconcile
 We must define what conditions constitute a desync that requires a correction. We will do this by overriding the ShouldReconciliate() method.
 It gives us two parameters: the latest received server State (which is in the past due to latency) and the client state that happened around that time.
-```
+```c#
 public override bool ShouldReconciliate(BoxStatePayload latestServerState, BoxStatePayload ClientState) {
     // We will get the error in rotation and position between the server and client states
     float positionError = Vector3.Distance(latestServerState.position, ClientState.position);
