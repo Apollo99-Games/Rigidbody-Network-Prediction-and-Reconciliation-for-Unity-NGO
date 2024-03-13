@@ -23,7 +23,7 @@ The Client will send inputs to the server. You can have anything here as the inp
 Note: The objectID needs to be Serialized but not the tick.
 Here is an example:
 
-```
+```cs
 public struct BoxInputPayload: IPayLoad
 {
     // This tick is important so the client knows at which time the desync happened inorder to rewind and correct it
