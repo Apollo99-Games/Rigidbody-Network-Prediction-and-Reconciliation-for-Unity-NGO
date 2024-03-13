@@ -228,7 +228,7 @@ public override BoxInputPayload GetInput()
 
 Then, we will override the SetInput() function to apply our input. Here, we will apply a force on the cube.
 ```cs
-public override BoxInputPayload GetInput()
+public override BoxInputPayload SetInput()
 {
     _rigidbody.AddForce(new Vector3(inputPayload.GetHorizontal(), 0f, inputPayload.GetVertical()) * 100f);
 }
