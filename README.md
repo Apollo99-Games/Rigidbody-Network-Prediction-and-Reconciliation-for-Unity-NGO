@@ -343,7 +343,7 @@ public override void OnPostSimulation(bool DidRunPhysics)
 ```
 
 # Other Features:
-*The Compressor
+**The Compressor
 Because of packet loss, we have to send redundant inputs to the server to mitigate this. This could increase bandwidth.
 A lot of the time, the input may have been the same as the last, so we can remove these redundant copies before sending them to the client and duplicate them once the server receives them.
 To do this we will have to modify our input payload and the receiver and sender methods for inputs:
@@ -371,7 +371,8 @@ public struct BoxInputPayload: ICompressible
     }
 }
 ```
-```
+For our Send and Receive functions we will merely pass them into the compress function and that's it:
+```cs
 public override void SendClientInputsToServer(List<BoxInputPayload> inputPayloads, InputMessage sender)
 {
     PayLoadBuffer<BoxInputPayload>.Compress(inputPayloads);
@@ -385,6 +386,8 @@ public override void ReceiveClientInputs(InputMessage receiver)
     AddClientInputs(objectInputs, receiver.tick);
 }
 ```
+Here is a before and after. Whenever the inputs are the same, the data usage drops significantly. 
+To even further optimize this, we can serialize the numberOfCopies variable only when there is a duplicate.
 
 
 
