@@ -14,11 +14,11 @@ This is an implementation of Rigidbody Network Prediction and Reconciliation for
 
 # Setting up the Prediction Manager:
 - Create an empty game object and call it "Prediction Manager."
-- Add the Prediction Tick and Prediction Manager to the game object.
+- Add the PredictionTick and PredictionManager Components to the game object.
 - We will leave the values as default, but if you would like more info on what they do, hover over them with your mouse in the editor
 
 # Setting up the InputPayload for the Cube:
-The cube we created before will be our player. First, let's create the pay loads that will be sent between the server and the client.
+The cube we created before will be our player. First, let's create the payloads that will be sent between the server and the client.
 The Client will send inputs to the server. You can have anything here as the input. However, you must use the IPayLoad interface, which forces you to implement tick and ID methods.
 Note: The objectID needs to be Serialized but not the tick.
 Here is an example:
@@ -26,9 +26,9 @@ Here is an example:
 ```cs
 public struct BoxInputPayload: IPayLoad
 {
-    // This tick is important so the client knows at which time the desync happened inorder to rewind and correct it
+    // This tick is important so the client knows at which time the desync happened in order to rewind and correct it
     public int tick;
-    // This is our input from the arrows keys on the keyboard
+    // This is our input from the arrow keys on the keyboard
     public float vertical;
     public float horizontal;
     // This is the objectID. Ensures the input is applied to the correct object
@@ -107,7 +107,7 @@ public struct BoxStatePayload: IPayLoad
 
 # Adding the input and state payloads to the messages:
 The PayLoad.cs file contains InputMessage and StateMessage classes. These are used to compile all the inputs and states of all prediction objects into one class.
-In order for the program to add our inputs and states, we must add a list to contain our payloads. For Example
+For the program to add our inputs and states, we must add a list containing our payloads. For Example
 
 ```cs
 public class InputMessage: EventArgs {
@@ -151,7 +151,7 @@ public class StateMessage: EventArgs {
 ```
 # Adding the input and state packets to the world packets:
 Once the states and inputs have been compiled in the message, they are converted to structs so they can be sent over to the client/server:
-Note that the WorldStatePayLoad does not need an OwnerID; that is only needed in the message class.
+Note that the WorldStatePayLoad does not need an OwnerID; it is only needed in the message class.
 
 ```cs
 public struct WorldInputPayload: INetworkSerializable
@@ -220,7 +220,8 @@ public override BoxInputPayload GetInput()
     float verticalInput = Input.GetAxis("Vertical");
 
     BoxInputPayload inputPayload = new BoxInputPayload();
-    inputPayload.SetAxis(horizontalInput, verticalInput);
+    inputPayload.horizontal = horizontalInput;
+    inputPayload.vertical = verticalInput;
 
     return inputPayload;
 }
@@ -228,7 +229,7 @@ public override BoxInputPayload GetInput()
 
 Then, we will override the SetInput() function to apply our input. Here, we will apply a force on the cube.
 ```cs
-public override BoxInputPayload SetInput()
+public override BoxInputPayload SetInput(BoxInputPayload inputPayload)
 {
     _rigidbody.AddForce(new Vector3(inputPayload.horizontal, 0f, inputPayload.vertical) * 100f);
 }
@@ -274,6 +275,119 @@ public override bool ShouldReconciliate(BoxStatePayload latestServerState, BoxSt
     return false;
 }
 ```
+
+# Sending and receiving inputs
+First, we will write the logic to send all the inputs from the client to the server
+We will override the SendClientInputsToServer() method to add all our input payloads to the input list we created in the input message:
+```cs
+public override void SendClientInputsToServer(List<BoxInputPayload> inputPayloads, InputMessage sender)
+{
+    sender.inputs.AddRange(inputPayloads);
+}
+```
+Now we will apply the inputs we received from the client on the server:
+```cs
+public override void ReceiveClientInputs(InputMessage receiver)
+{
+    // We will find all the inputs that have the ID associated with this object
+    List<BoxInputPayload> objectInputs = PayLoadBuffer<BoxInputPayload>.FindObjectItems(receiver.inputs, ObjectID);
+    // We will add it to the client inputs where it will eventually be applied 
+    AddClientInputs(objectInputs, receiver.tick);
+}
+```
+
+# Sending and receiving states
+It is a similar process for states but requires one extra method. This extra method allows you to compare all the states of all objects at once.
+This will give you more control over what you want to send, as the state payload costs a lot of bandwidth. We must only send what we need. 
+For example, if one client is far away from another, there is no point of sending these two clients the state about each other.
+
+Note that here we can also send inputs to all the clients. However, be careful when applying movement from other clients on devices that are not the server.
+As the clients already get the state, they will then apply the input on top of that, essentially doing the same thing twice. This can result in gitter. 
+We will talk about solutions to this later on.
+```cs
+public override void ReceiveServerState(StateMessage receiver) {
+    ApplyServerInputs(PayLoadBuffer<BoxInputPayload>.FindObjectItems(receiver.inputs, ObjectID), receiver.tick);
+    ApplyServerState(PayLoadBuffer<BoxStatePayload>.FindObjectItem(receiver.states, ObjectID), receiver.tick);
+}
+
+public override void CompileServerState(BoxStatePayload statePayload, List<BoxInputPayload> inputPayloads, StateMessage Compiler) {
+    Compiler.states.Add(statePayload);
+    Compiler.inputs.AddRange(inputPayloads);
+}
+
+public override void SortStateToSendToClient(StateMessage defaultWorldState, StateMessage sender) {
+    // here we just send all the states and inputs. Ideally, you would only want to send what is needed
+    sender.states.AddRange(defaultWorldState.states);
+    sender.inputs.AddRange(defaultWorldState.inputs);
+}
+```
+
+# Interpolation
+This demo provides a basic interpolator. You would probably want to write your own, as this one is just meant for testing but does work.
+We will not be interpolating the actual rigid body but simply the visual. To do this:
+- create an empty game object in your cube prefab and parent the current cube to it.
+- Now move all your components (besides the ones that hold visual data like the material and mesh renderer) onto the parent
+- We will rename the child game object that just has the box to "visual."
+- Add the interpolator script to the visual and pass a reference of it to the our CubeMove script
+- Finally, we will write this logic that runs right after the physics simulation that sends the cube's new state to the interpolator for interpolation
+```cs
+public override void OnPostSimulation(bool DidRunPhysics)
+{
+    // No point of sending the position and rotation if the client is reconciliating as we won't see it anyways
+    if (!PredictionManager.Singleton.IsReconciliating) {
+        // DidReconciliate returns a bool if the client did reconciliate sometime during this tick
+        interpolator.addPosition(GetState().position, PredictionManager.Singleton.DidReconciliate);
+        interpolator.addRotation(GetState().rotation);
+    }
+}
+```
+
+# Other Features:
+*The Compressor
+Because of packet loss, we have to send redundant inputs to the server to mitigate this. This could increase bandwidth.
+A lot of the time, the input may have been the same as the last, so we can remove these redundant copies before sending them to the client and duplicate them once the server receives them.
+To do this we will have to modify our input payload and the receiver and sender methods for inputs:
+```cs
+public struct BoxInputPayload: ICompressible
+{
+    // the number of duplicates this input had
+    private byte numberOfCopies;
+
+    // our previous code goes here
+
+    public void SetNumberOfCopies(int num)
+    {
+        numberOfCopies = (byte)num;
+    }
+
+    public byte GetNumberOfCopies()
+    {
+        return numberOfCopies;
+    }
+
+    public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter {
+        // our previous code goes here
+        serializer.SerializeValue(ref numberOfCopies);
+    }
+}
+```
+```
+public override void SendClientInputsToServer(List<BoxInputPayload> inputPayloads, InputMessage sender)
+{
+    PayLoadBuffer<BoxInputPayload>.Compress(inputPayloads);
+    sender.inputs.AddRange(inputPayloads);
+}
+
+public override void ReceiveClientInputs(InputMessage receiver)
+{
+    List<BoxInputPayload> objectInputs = PayLoadBuffer<BoxInputPayload>.FindObjectItems(receiver.inputs, ObjectID);
+    PayLoadBuffer<BoxInputPayload>.Decompress(objectInputs);
+    AddClientInputs(objectInputs, receiver.tick);
+}
+```
+
+
+
 
 
 
