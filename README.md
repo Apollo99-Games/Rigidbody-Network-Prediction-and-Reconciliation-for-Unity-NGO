@@ -297,7 +297,7 @@ public override void ReceiveClientInputs(InputMessage receiver)
 ```
 
 # Sending and receiving states
-It is a similar process for states but requires one extra method. This extra method allows you to compare all the states of all objects at once.
+It is a similar process for states but requires one extra method called SortStateToSendToClient(). This extra method allows you to compare all the states of all objects at once.
 This will give you more control over what you want to send, as the state payload costs a lot of bandwidth. We must only send what we need. 
 For example, if one client is far away from another, there is no point of sending these two clients the state about each other.
 
