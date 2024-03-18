@@ -27,32 +27,16 @@ Here is an example:
 public struct BoxInputPayload: IPayLoad
 {
     // This tick is important so the client knows at which time the desync happened in order to rewind and correct it
-    public int tick;
+    private int tick;
     // This is our input from the arrow keys on the keyboard
     public float vertical;
     public float horizontal;
     // This is the objectID. Ensures the input is applied to the correct object
-    public byte objectID;
+    private byte objectID;
 
-    public bool IsEmpty() {
-        return Equals(default(BoxInputPayload));
-    }
+    public int Tick { get => tick; set => this.tick = value; }
 
-    public int GetTick() {
-        return tick;
-    }
-
-    public void SetTick(int tick) {
-        this.tick = tick;
-    }
-
-    public byte GetObjectID() {
-        return objectID;
-    }
-
-    public void SetObjectID(byte ObjectID) {
-        this.objectID = ObjectID;
-    }
+    public byte ObjectID { get => objectID; set => this.objectID = value; }
     
     public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter {
         serializer.SerializeValue(ref objectID);
@@ -68,32 +52,16 @@ Here is an example of a state, as we are syncing a rigid body we need send over 
 ```cs
 public struct BoxStatePayload: IPayLoad
 {
-    public int tick;
-    public byte objectID;
+    private int tick;
+    private byte objectID;
     public Vector3 position;
     public Quaternion rotation;
     public Vector3 velocity;
     public Vector3 angularVelocity;
 
-    public bool IsEmpty() {
-        return Equals(default(BoxStatePayload));
-    }
+    public int Tick { get => tick; set => this.tick = value; }
 
-    public int GetTick() {
-        return tick;
-    }
-
-    public void SetTick(int tick) {
-        this.tick = tick;
-    }
-
-    public byte GetObjectID() {
-        return objectID;
-    }
-
-    public void SetObjectID(byte objectID) {
-        this.objectID = objectID;
-    }
+    public byte ObjectID { get => objectID; set => this.objectID = value; }
 
     public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter {
         serializer.SerializeValue(ref objectID);
