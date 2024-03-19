@@ -74,31 +74,17 @@ public struct BoxStatePayload: IPayLoad
 ```
 
 # Adding the input and state payloads to the messages:
-The PayLoad.cs file contains InputMessage and StateMessage classes. These are used to compile all the inputs and states of all prediction objects into one class.
-For the program to add our inputs and states, we must add a list containing our payloads. For Example
+The PayLoad.cs file contains a Message class. This is used to compile all the inputs and states of all prediction objects into one class.
+For the program to add our inputs and states, we must add a list containing our payloads. For Example:
 
 ```cs
-public class InputMessage: EventArgs {
-    // We add a list to store our inputs
-    public List<BoxInputPayload> inputs;
 
-    public int tick;
-    public InputMessage() {
-        inputs = new List<BoxInputPayload>();
-        tick = 0;
-    }
-
-    public InputMessage(WorldInputPayload worldInputPayload) {
-        //This is so that the packet (struct) received from the server can be converted into an InputMessage to prevent extensive copying
-        this.inputs = new List<BoxInputPayload>(worldInputPayload.inputs);
-
-        this.tick = worldInputPayload.tick;
-    }
-}
-
-public class StateMessage: EventArgs {
+public class Message: EventArgs {
+    // Our stuff
     public List<BoxStatePayload> states;
     public List<BoxInputPayload> inputs;
+
+    // Required stuff
     public int tick;
     public ushort OwnerID;
     public ClientRpcParams sendParams;
@@ -110,8 +96,13 @@ public class StateMessage: EventArgs {
         OwnerID = 0;
     }
 
-    public StateMessage(WorldStatePayload worldPayload) {
+    public Message(WorldStatePayload worldPayload) {
         this.states = new List<BoxStatePayload>(worldPayload.states);
+        this.inputs = new List<BoxInputPayload>(worldPayload.inputs);
+        this.tick = worldPayload.tick;
+    }
+
+    public Message(WorldInputPayload worldPayload) {
         this.inputs = new List<BoxInputPayload>(worldPayload.inputs);
         this.tick = worldPayload.tick;
     }
@@ -119,7 +110,7 @@ public class StateMessage: EventArgs {
 ```
 # Adding the input and state packets to the world packets:
 Once the states and inputs have been compiled in the message, they are converted to structs so they can be sent over to the client/server:
-Note that the WorldStatePayLoad does not need an OwnerID; it is only needed in the message class.
+Note that the PayLoads do not need an OwnerID; it is only needed in the message class.
 
 ```cs
 public struct WorldInputPayload: INetworkSerializable
@@ -321,17 +312,9 @@ public struct BoxInputPayload: ICompressible
     // the number of duplicates this input had
     private byte numberOfCopies;
 
-    // our previous code goes here
+    // our previous input code goes here
 
-    public void SetNumberOfCopies(int num)
-    {
-        numberOfCopies = (byte)num;
-    }
-
-    public byte GetNumberOfCopies()
-    {
-        return numberOfCopies;
-    }
+    public byte NumberOfCopies { get => numberOfCopies; set => this.numberOfCopies = value; }
 
     public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter {
         // our previous code goes here
@@ -354,8 +337,8 @@ public override void ReceiveClientInputs(InputMessage receiver)
     AddClientInputs(objectInputs, receiver.tick);
 }
 ```
-Here is a before and after. Whenever the inputs are the same, the data usage drops significantly. 
-To even further optimize this, we can serialize the numberOfCopies variable only when there is a duplicate.
+Whenever the inputs are the same, the data usage drops significantly. 
+To optimize this even further, we can serialize the number of copies variable only when there is a duplicate, but this would only save 7 bits.
 
 
 
