@@ -260,9 +260,6 @@ It is a similar process for states but requires one extra method called SortStat
 This will give you more control over what you want to send, as the state payload costs a lot of bandwidth. We must only send what we need. 
 For example, if one client is far away from another, there is no point of sending these two clients the state about each other.
 
-Note that here we can also send inputs to all the clients. However, be careful when applying movement from other clients on devices that are not the server.
-As the clients already get the state, they will then apply the input on top of that, essentially doing the same thing twice. This can result in gitter. 
-We will talk about solutions to this later on.
 ```cs
 public override void ReceiveServerState(StateMessage receiver) {
     ApplyServerInputs(PayLoadBuffer<BoxInputPayload>.FindObjectItems(receiver.inputs, ObjectID), receiver.tick);
@@ -278,6 +275,18 @@ public override void SortStateToSendToClient(StateMessage defaultWorldState, Sta
     // here we just send all the states and inputs. Ideally, you would only want to send what is needed
     sender.states.AddRange(defaultWorldState.states);
     sender.inputs.AddRange(defaultWorldState.inputs);
+}
+```
+Note that here we can also send inputs to all the clients. However, be careful when applying movement from other clients on devices that are not the server.
+As the clients already get the state, they will then apply the input on top of that, essentially doing the same thing twice. This can result in gitter. 
+One potential fix is to only apply any input to do with movement on the object owner or the server. For example:
+```cs
+public override BoxInputPayload SetInput(BoxInputPayload inputPayload)
+{
+    if (IsOwner || IsServer) {
+        // the movement code
+        _rigidbody.AddForce(new Vector3(inputPayload.horizontal, 0f, inputPayload.vertical) * 100f);
+    }
 }
 ```
 
@@ -301,8 +310,7 @@ public override void OnPostSimulation(bool DidRunPhysics)
 }
 ```
 
-# Other Features:
-**The Compressor
+# Compressing Redundant Inputs
 Because of packet loss, we have to send redundant inputs to the server to mitigate this. This could increase bandwidth.
 A lot of the time, the input may have been the same as the last, so we can remove these redundant copies before sending them to the client and duplicate them once the server receives them.
 To do this we will have to modify our input payload and the receiver and sender methods for inputs:
