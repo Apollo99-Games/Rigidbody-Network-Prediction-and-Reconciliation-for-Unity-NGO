@@ -290,6 +290,29 @@ public override BoxInputPayload SetInput(BoxInputPayload inputPayload)
 }
 ```
 
+Here is an example of using the SortStateToSendToClient() function to only send information about players that are close to each other:
+```cs
+public override void SortStateToSendToClient(Message defaultWorldState, Message sender) {
+    for (int i = 0; i < defaultWorldState.states.Count; i++)
+    {
+        // If the object data is already in the sender, we don't need to do anything, so skip it so we don't have any duplicates.
+        if (PayLoadBuffer<BoxStatePayload>.ContainsID(sender.states, defaultWorldState.states[i].ObjectID)) continue;
+
+        //If we find this object's data, we will add it to the sender
+        if (defaultWorldState.states[i].ObjectID == ObjectID ) {
+            sender.states.Add(defaultWorldState.states[i]);
+        }
+
+        // For all the other objects, we will make sure they are within 100 meters; if not, we won't send their data as they are too far.
+        else if (Vector3.Distance(defaultWorldState.states[i].position, GetState().position) < 100) {
+            sender.states.Add(defaultWorldState.states[i]);
+            sender.inputs.AddRange(PayLoadBuffer<BoxInputPayload>.FindObjectItems(defaultWorldState.inputs, defaultWorldState.states[i].ObjectID));
+        }
+    }
+    }
+```
+As you can see when the object is further away, bandwidth usage decreases: 
+
 # Interpolation
 This demo provides a basic interpolator. You would probably want to write your own, as this one is just meant for testing but does work.
 We will not be interpolating the actual rigid body but simply the visual. To do this:
