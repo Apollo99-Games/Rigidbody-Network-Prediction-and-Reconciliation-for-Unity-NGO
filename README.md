@@ -369,7 +369,7 @@ public override void ReceiveClientInputs(InputMessage receiver)
 }
 ```
 Whenever the inputs are the same, the data usage drops significantly. 
-To optimize this even further, we can serialize the number of copies variable only when there is a duplicate, but this would only save 7 bits.
+To optimize this even further, we can serialize the number of copies variable only when there is a duplicate, but this would only save 7 bits * the number of redundant inputs.
 
 
 
