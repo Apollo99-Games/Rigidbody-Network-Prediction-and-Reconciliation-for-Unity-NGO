@@ -164,7 +164,7 @@ We will ensure it inherits the Prediction<T, T>. The first generic will be our i
 [GenerateSerializationForTypeAttribute(typeof(BoxStatePayload))]
 public class CubeMove : Prediction<BoxInputPayload, BoxStatePayload>
 {
-    // As we are working with a Rigid body, we will need a reference of that component
+    // As we are working with a Rigid body, we will need a reference for that component
     [SerializeField] Rigidbody _rigidbody;
 }
 ```
@@ -208,6 +208,9 @@ public override BoxStatePayload GetState() {
 }
 
 public override void SetState(BoxStatePayload statePayload) {
+    transform.position = statePayload.position;
+    transform.rotation = statePayload.rotation;
+
     _rigidbody.position = statePayload.position;
     _rigidbody.rotation = statePayload.rotation;
     _rigidbody.velocity = statePayload.velocity;
@@ -322,9 +325,9 @@ We will not be interpolating the actual rigid body but simply the visual. To do 
 public override void OnPostSimulation(bool DidRunPhysics)
 {
     // No point in sending the position and rotation if the client is reconciliation as we won't see it anyway
-    if (!PredictionManager.Singleton.IsReconciliating) {
+    if (!PredictionManager.Singleton.IsReconciling && interpolator != null) {
         // DidReconciliate would return a bool if the client did reconciliation sometime during this tick
-        interpolator.addPosition(GetState().position, PredictionManager.Singleton.DidReconciliate);
+        interpolator.addPosition(GetState().position, NeededToReconcile);
         interpolator.addRotation(GetState().rotation);
     }
 }
