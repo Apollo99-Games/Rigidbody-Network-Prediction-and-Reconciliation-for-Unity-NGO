@@ -7,7 +7,7 @@ This is an implementation of Rigidbody Network Prediction and Reconciliation for
 - Netcode for GameObjects 1.7.1
 
 # Prerequisites For Creating a Demo Scene for Rigidbody Network Prediction and Reconciliation using a basic cube:
-- Edit -> Project Settings -> Physics -> Enable Enhanced Determinism
+- In the Unity editor go to Edit -> Project Settings -> Physics -> Enable Enhanced Determinism
 - Have the Network Manager from the NGO setup
 - Add a plane with a box collider at coordinates (0, -1, 0) and with a scale of (1000, 1000, 1000)
 - Create a box prefab with a box collider, Rigidbody with a mass of 5kg, and scale of (2, 2, 2). The values can be anything you want. It would be helpful if the box is a different colour than the plane.
