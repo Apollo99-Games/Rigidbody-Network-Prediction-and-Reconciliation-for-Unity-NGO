@@ -226,9 +226,6 @@ public override bool ShouldReconciliate(BoxStatePayload latestServerState, BoxSt
 
     //If the error is above a certain threshold, we will tell the client to correct itself to sync with the server
     if (positionError > 0.01f || rotDif > 0.001f) {
-        if (IsOwner) {
-            Debug.Log("Did recon");
-        }
         return true;
     }
     return false;
