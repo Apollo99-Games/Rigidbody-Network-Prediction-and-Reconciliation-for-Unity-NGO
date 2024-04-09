@@ -48,7 +48,7 @@ public struct BoxInputPayload: IPayLoad
 
 # Setting up the StatePayload for the Cube:
 This is the final state the server will send to the client to ensure they are synced. The methods required here are the same as the input method.
-Here is an example of a state, as we are syncing a rigid body we need send over the velocity and angular velocity to the client:
+Here is an example of a state: as we are syncing a rigid body, we need to send over the velocity and angular velocity to the client:
 ```cs
 public struct BoxStatePayload: IPayLoad
 {
@@ -75,7 +75,7 @@ public struct BoxStatePayload: IPayLoad
 
 # Adding the input and state payloads to the messages:
 The PayLoad.cs file contains a Message class. This is used to compile all the inputs and states of all prediction objects into one class.
-For the program to add our inputs and states, we must add a list containing our payloads. For Example:
+We must add a list containing our payloads for the program to add our inputs and states. For Example:
 
 ```cs
 
@@ -116,7 +116,7 @@ Note that the PayLoads do not need an OwnerID; it is only needed in the message 
 public struct WorldInputPayload: INetworkSerializable
 {
     public int tick;
-    // the inputs to be sent over to the server
+    //The inputs to be sent over to the server
     public BoxInputPayload[] inputs;
 
     public static WorldInputPayload Create(InputMessage inputMessage) {
@@ -135,7 +135,7 @@ public struct WorldInputPayload: INetworkSerializable
 public struct WorldStatePayload: INetworkSerializable
 {
     public int tick;
-    // this inputs and states of all the objects needed to be sent from the server to all clients
+    //This stores the inputs and states all the objects needed to be sent from the server to all clients
     public BoxStatePayload[] states;
     public BoxInputPayload[] inputs;
 
@@ -155,7 +155,7 @@ public struct WorldStatePayload: INetworkSerializable
 ```
 
 # Creating the movement logic Class:
-Now that we are done creating the data to be sent over, we can start writing the movement logic to control our cube. Let's create a new class called "CubeMove." 
+Now that we have created the data to be sent, we can start writing the movement logic to control our cube. Let's create a new class called "CubeMove." 
 We will ensure it inherits the Prediction<T, T>. The first generic will be our input payload; the next will be the state. For example:
 
 ```cs
@@ -247,7 +247,7 @@ public override void ReceiveClientInputs(InputMessage receiver)
 {
     // We will find all the inputs that have the ID associated with this object
     List<BoxInputPayload> objectInputs = PayLoadBuffer<BoxInputPayload>.FindObjectItems(receiver.inputs, ObjectID);
-    // We will add it to the client inputs where it will eventually be applied 
+    // We will add it to the client inputs, where it will eventually be applied 
     AddClientInputs(objectInputs, receiver.tick);
 }
 ```
@@ -269,14 +269,14 @@ public override void CompileServerState(BoxStatePayload statePayload, List<BoxIn
 }
 
 public override void SortStateToSendToClient(StateMessage defaultWorldState, StateMessage sender) {
-    // here we just send all the states and inputs. Ideally, you would only want to send what is needed
+    //Here, we just send all the states and inputs. Ideally, you would only want to send what is needed
     sender.states.AddRange(defaultWorldState.states);
     sender.inputs.AddRange(defaultWorldState.inputs);
 }
 ```
-Note that here we can also send inputs to all the clients. However, be careful when applying movement from other clients on devices that are not the server.
+Note that we can also send inputs to all the clients here. However, be careful when applying movement from other clients on devices that are not on the server.
 As the clients already get the state, they will then apply the input on top of that, essentially doing the same thing twice. This can result in gitter. 
-One potential fix is to only apply any input to do with movement on the object owner or the server. For example:
+One potential fix is to only apply any input related to movement on the object owner or the server. For example:
 ```cs
 public override BoxInputPayload SetInput(BoxInputPayload inputPayload)
 {
@@ -287,7 +287,7 @@ public override BoxInputPayload SetInput(BoxInputPayload inputPayload)
 }
 ```
 
-Here is an example of using the SortStateToSendToClient() function to only send information about players that are close to each other:
+Here is an example of using the SortStateToSendToClient() function to send only information about players that are close to each other:
 ```cs
 public override void SortStateToSendToClient(Message defaultWorldState, Message sender) {
     for (int i = 0; i < defaultWorldState.states.Count; i++)
@@ -311,19 +311,19 @@ public override void SortStateToSendToClient(Message defaultWorldState, Message 
 As you can see when the object is further away, bandwidth usage decreases: 
 
 # Interpolation
-This demo provides a basic interpolator. You would probably want to write your own, as this one is just meant for testing but does work.
+This demo provides a basic interpolator. You would probably want to write your own, as this one is meant for testing but works.
 We will not be interpolating the actual rigid body but simply the visual. To do this:
 - create an empty game object in your cube prefab and parent the current cube to it.
 - Now move all your components (besides the ones that hold visual data like the material and mesh renderer) onto the parent
 - We will rename the child game object that just has the box to "visual."
-- Add the interpolator script to the visual and pass a reference of it to the our CubeMove script
+- Add the interpolator script to the visual and pass a reference of it to our CubeMove script
 - Finally, we will write this logic that runs right after the physics simulation that sends the cube's new state to the interpolator for interpolation
 ```cs
 public override void OnPostSimulation(bool DidRunPhysics)
 {
-    // No point of sending the position and rotation if the client is reconciliating as we won't see it anyways
+    // No point in sending the position and rotation if the client is reconciliation as we won't see it anyway
     if (!PredictionManager.Singleton.IsReconciliating) {
-        // DidReconciliate returns a bool if the client did reconciliate sometime during this tick
+        // DidReconciliate would return a bool if the client did reconciliation sometime during this tick
         interpolator.addPosition(GetState().position, PredictionManager.Singleton.DidReconciliate);
         interpolator.addRotation(GetState().rotation);
     }
@@ -332,25 +332,25 @@ public override void OnPostSimulation(bool DidRunPhysics)
 
 # Compressing Redundant Inputs
 Because of packet loss, we have to send redundant inputs to the server to mitigate this. This could increase bandwidth.
-A lot of the time, the input may have been the same as the last, so we can remove these redundant copies before sending them to the client and duplicate them once the server receives them.
-To do this we will have to modify our input payload and the receiver and sender methods for inputs:
+The input may often be the same as the last, so we can remove these redundant copies before sending them to the client and duplicate them once the server receives them.
+To do this, we will have to modify our input payload and the receiver and sender methods for inputs:
 ```cs
 public struct BoxInputPayload: ICompressible
 {
-    // the number of duplicates this input had
+    //The number of duplicates this input had
     private byte numberOfCopies;
 
-    // our previous input code goes here
+    //Our previous input code goes here
 
     public byte NumberOfCopies { get => numberOfCopies; set => this.numberOfCopies = value; }
 
     public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter {
-        // our previous code goes here
+        //Our previous code goes here
         serializer.SerializeValue(ref numberOfCopies);
     }
 }
 ```
-For our Send and Receive functions we will merely pass them into the compress function and that's it:
+For our Send and Receive functions, we will merely pass them into the compress function, and that's it:
 ```cs
 public override void SendClientInputsToServer(List<BoxInputPayload> inputPayloads, InputMessage sender)
 {
