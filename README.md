@@ -208,13 +208,14 @@ public override BoxStatePayload GetState() {
 }
 
 public override void SetState(BoxStatePayload statePayload) {
-    transform.position = statePayload.position;
-    transform.rotation = statePayload.rotation;
-
     _rigidbody.position = statePayload.position;
     _rigidbody.rotation = statePayload.rotation;
     _rigidbody.velocity = statePayload.velocity;
     _rigidbody.angularVelocity = statePayload.angularVelocity;
+
+    // This is not needed in this case. In objects involving more complex physics, such as ray casts, it could help prevent jitter
+    transform.position = statePayload.position;
+    transform.rotation = statePayload.rotation;
 }
 ```
 
