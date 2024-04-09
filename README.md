@@ -156,13 +156,13 @@ public struct WorldStatePayload: INetworkSerializable
 
 # Creating the movement logic Class:
 Now that we have created the data to be sent, we can start writing the movement logic to control our cube. Let's create a new class called "CubeMove." 
-We will ensure it inherits the Prediction<T, T>. The first generic will be our input payload; the next will be the state. For example:
+We will ensure it inherits the PredictionObject<T, T>. The first generic will be our input payload; the next will be the state. For example:
 
 ```cs
 // Unity Netcode for Gameobjects requires tags when working with generics
 [GenerateSerializationForTypeAttribute(typeof(BoxInputPayload))]
 [GenerateSerializationForTypeAttribute(typeof(BoxStatePayload))]
-public class CubeMove : Prediction<BoxInputPayload, BoxStatePayload>
+public class CubeMove : PredictionObject<BoxInputPayload, BoxStatePayload>
 {
     // As we are working with a Rigid body, we will need a reference for that component
     [SerializeField] Rigidbody _rigidbody;
