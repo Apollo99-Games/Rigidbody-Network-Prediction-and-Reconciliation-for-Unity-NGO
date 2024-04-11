@@ -383,7 +383,7 @@ Note the peaks here will be higher as we need an extra byte to store the number 
 However, the troughs will be a lot lower:
 ![Min bytes compression](https://github.com/ApolloGames99/Rigidbody-Network-Prediction-and-Reconciliation-for-Unity-NGO/assets/163193765/a9929459-1afd-4eab-a984-8299db6e9acf)
 
-This is most useful when you have large input packets with lots of data or redundant inputs.
+This is most useful when you have large input packets with lots of data and redundant inputs.
 
 
 
