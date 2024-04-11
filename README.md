@@ -373,8 +373,18 @@ public override void ReceiveClientInputs(InputMessage receiver)
     AddClientInputs(objectInputs, receiver.tick);
 }
 ```
-Whenever the inputs are the same, the data usage drops significantly. 
-To optimize this even further, we can serialize the number of copies variable only when there is a duplicate, but this would only save 7 bits * the number of redundant inputs.
+Here is an example of a server receiving input from a client with no compression. It's using about 104 bytes per tick in this case:
+![no compression](https://github.com/ApolloGames99/Rigidbody-Network-Prediction-and-Reconciliation-for-Unity-NGO/assets/163193765/2065738c-3a08-4815-8b43-ed82d650c9ab)
+
+Here are the inputs above but with compression ON (the InputPayLoad is the same, but not necessarily the values). 
+Note the peaks here will be higher as we need an extra byte to store the number of copies:
+![Max bytes compression](https://github.com/ApolloGames99/Rigidbody-Network-Prediction-and-Reconciliation-for-Unity-NGO/assets/163193765/69e4d350-ca6a-4e02-b2ff-ca9d893a33a7)
+
+However, the troughs will be a lot lower:
+![Min bytes compression](https://github.com/ApolloGames99/Rigidbody-Network-Prediction-and-Reconciliation-for-Unity-NGO/assets/163193765/a9929459-1afd-4eab-a984-8299db6e9acf)
+
+This is most useful when you have large input packets with lots of data or redundant inputs.
+
 
 
 
