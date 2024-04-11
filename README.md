@@ -373,7 +373,7 @@ public override void ReceiveClientInputs(InputMessage receiver)
     AddClientInputs(objectInputs, receiver.tick);
 }
 ```
-Here is an example of a server receiving input from a client with no compression. It's using about 104 bytes per tick in this case:
+Here is an example of a server receiving input from a client with no compression. Note redundant inputs is set to 9 in all the images:
 ![no compression](https://github.com/ApolloGames99/Rigidbody-Network-Prediction-and-Reconciliation-for-Unity-NGO/assets/163193765/2065738c-3a08-4815-8b43-ed82d650c9ab)
 
 Here are the inputs above but with compression ON (the InputPayLoad is the same, but not necessarily the values). 
