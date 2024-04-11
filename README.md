@@ -321,11 +321,10 @@ As you can see when the object is further away, bandwidth usage decreases:
 # Interpolation
 This demo provides a basic interpolator. You would probably want to write your own, as this one is meant for testing but works.
 We will not be interpolating the actual rigid body but simply the visual. To do this:
-- create an empty game object in your cube prefab and parent the current cube to it.
-- Now move all your components (besides the ones that hold visual data like the material and mesh renderer) onto the parent
-- We will rename the child game object that just has the box to "visual."
-- Add the interpolator script to the visual and pass a reference of it to our CubeMove script
-- Finally, we will write this logic that runs right after the physics simulation that sends the cube's new state to the interpolator for interpolation
+- create a new cube in your cube prefab made earlier and call it "visual." Make sure both cubes are identical (colour and scale).
+- Remove Mesh Renderer and filter scripts from the parent. Add the CubeMove script to the parent
+- Add the Interpolator script to the "visual" and pass a reference of it to our CubeMove script
+- Finally, we will write this logic that runs right after the physics simulation in the CubeMove script that sends the cube's new state to the interpolator for interpolation
 ```cs
 public override void OnPostSimulation(bool DidRunPhysics)
 {
