@@ -330,7 +330,7 @@ public override void OnPostSimulation(bool DidRunPhysics)
 {
     // No point in sending the position and rotation if the client is reconciliation as we won't see it anyway
     if (!PredictionManager.Singleton.IsReconciling && interpolator != null) {
-        // DidReconciliate would return a bool if the client did reconciliation sometime during this tick
+        // NeededToReconcile would return a bool if the client did reconciliation sometime during this tick
         interpolator.AddPosition(GetState().position, NeededToReconcile);
         interpolator.AddRotation(GetState().rotation);
     }
