@@ -14,6 +14,7 @@ This is an implementation of Rigidbody Network Prediction and Reconciliation for
 - Have the Network Manager from the NGO setup
 - Add a plane with a box collider at coordinates (0, -1, 0) and with a scale of (1000, 1000, 1000)
 - Create a box prefab with a box collider, Rigidbody with a mass of 5kg, and scale of (2, 2, 2). The values can be anything you want. It would be helpful if the box is a different colour than the plane.
+https://youtu.be/EXEfwJXR3kQ
 
 
 # Setting up the Prediction Manager:
