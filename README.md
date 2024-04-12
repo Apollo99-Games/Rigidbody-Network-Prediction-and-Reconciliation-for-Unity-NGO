@@ -283,7 +283,7 @@ public override void SortStateToSendToClient(StateMessage defaultWorldState, Sta
 }
 ```
 Note that we can also send inputs to all the clients here. However, be careful when applying movement from other clients on devices that are not on the server.
-As the clients already get the state, they will then apply the input on top of that, essentially doing the same thing twice. This can result in gitter. 
+As the clients already get the state, they will then apply the input on top of that, essentially doing the same thing twice. This can result in jitter. 
 One potential fix is to only apply any input related to movement on the object owner or the server. For example:
 ```cs
 public override BoxInputPayload SetInput(BoxInputPayload inputPayload)
