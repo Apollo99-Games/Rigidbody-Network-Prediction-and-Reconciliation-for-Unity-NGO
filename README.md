@@ -23,6 +23,11 @@ https://github.com/Apollo99-Games/Rigidbody-Network-Prediction-and-Reconciliatio
 - Add the PredictionTick and PredictionManager Components to the game object.
 - We will leave the values as default, but if you would like more info on what they do, hover over them with your mouse in the editor
 
+
+https://github.com/Apollo99-Games/Rigidbody-Network-Prediction-and-Reconciliation-for-Unity-NGO/assets/163193765/16c39ffc-f9b7-4d76-b498-dcfafd00d8da
+
+
+
 # Setting up the InputPayload for the Cube:
 The cube we created before will be our player. First, let's create the payloads that will be sent between the server and the client.
 The Client will send inputs to the server. You can have anything here as the input. However, you must use the IPayLoad interface, which forces you to implement tick and ID methods.
@@ -327,6 +332,11 @@ We will not be interpolating the actual rigid body but simply the visual. To do 
 - Remove Mesh Renderer and filter scripts from the parent. Add the CubeMove script to the parent
 - Add the Interpolator script to the "visual" and pass a reference of it to our CubeMove script
 - Finally, we will write this logic that runs right after the physics simulation in the CubeMove script that sends the cube's new state to the interpolator for interpolation
+
+
+https://github.com/Apollo99-Games/Rigidbody-Network-Prediction-and-Reconciliation-for-Unity-NGO/assets/163193765/bd4b4a4d-92b8-412a-a0b5-ef8a7389105f
+
+
 ```cs
 public override void OnPostSimulation(bool DidRunPhysics)
 {
