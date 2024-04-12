@@ -323,7 +323,6 @@ public override void SortStateToSendToClient(Message defaultWorldState, Message 
     }
     }
 ```
-As you can see when the object is further away, bandwidth usage decreases: 
 
 # Interpolation
 This demo provides a basic interpolator. You would probably want to write your own, as this one is meant for testing but works.
