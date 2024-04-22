@@ -15,7 +15,7 @@ https://github.com/Apollo99-Games/Rigidbody-Network-Prediction-and-Reconciliatio
 https://github.com/Apollo99-Games/Rigidbody-Network-Prediction-and-Reconciliation-for-Unity-NGO/assets/163193765/1d4feb48-3c41-4b7a-8b7c-8dfb1b1a06b4
 
 ## Over LAN network + 100 MS RTT delay + 5% Packet loss (both receiving and sending)
-Note how the client's cube is not lagging. This is because the program compensates for packet loss by sending redundant inputs.
+Note how the client's cube doesn't look like it's teleporting (unless there is a collision). This is because the program compensates for packet loss by sending redundant inputs.
 However, the host (server) does not send redundant information about its player or any other player to the clients. 
 This is to save on bandwidth, but results in  a lot of corrections, especially when there are collisions.
 
