@@ -241,6 +241,7 @@ public class PredictionManager : NetworkBehaviour
     /// <returns>The reconciled tick value</returns>
     private int DoReconcile() {
         int rewindTick = -1; 
+        if (OnShouldRecon == null) return rewindTick;
         foreach (Func<int> funcCall in OnShouldRecon.GetInvocationList())
         {
             int tick = funcCall();
