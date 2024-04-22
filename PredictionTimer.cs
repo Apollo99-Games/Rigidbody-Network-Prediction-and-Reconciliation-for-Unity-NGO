@@ -14,14 +14,14 @@ public class PredictionTimer : NetworkBehaviour
     void Awake() {
         tick = 0;
         minTimeBetweenTicks = 1f / (float)serverTickRate;
+
+        if (Singleton != null && Singleton != this) Destroy(this); 
+        else Singleton = this; 
     }
 
     void Start()
     {
         Physics.simulationMode = SimulationMode.Script;
-
-        if (Singleton != null && Singleton != this) Destroy(this); 
-        else Singleton = this; 
     }
     // Update is called once per frame
     void Update()
