@@ -6,7 +6,7 @@ using Unity.Netcode;
 public class PredictionManager : NetworkBehaviour
 {
     public const int BUFFER_SIZE = 512;
-    [Tooltip("Over the network packets can be lost, so extra redundent packets are sent to compensate. This sets the maximum number of extra packets a prediction object can send")]
+    [Tooltip("Over the network packets can be lost, so extra redundant packets are sent to compensate. This sets the maximum number of extra packets a prediction object can send")]
     public int MaxRedundentInputs = 10;
     
     [Tooltip("The maximum time in milliseconds the client can spend running the physics simulation when reconciling.")]
@@ -19,11 +19,11 @@ public class PredictionManager : NetworkBehaviour
     /// </summary>
     [HideInInspector] public bool IsReconciling { get; private set; }
     /// <summary>
-    /// Returns if the prediction manager did reconciling sometime during this tick
+    /// Returns if the prediction manager did reconcile sometime during this tick
     /// </summary>
     [HideInInspector] public bool DidReconcile { get; private set; }
     /// <summary>
-    /// Returns if the prediction manager received a input packet this tick
+    /// Returns if the prediction manager received an input packet this tick
     /// </summary>
     [HideInInspector] public bool DidReceiveInputPacket { get; private set; }
     /// <summary>
@@ -31,7 +31,7 @@ public class PredictionManager : NetworkBehaviour
     /// </summary>
     [HideInInspector] public bool DidReceiveStatePacket { get; private set; }
 
-    [Tooltip("If left checked will reconcile all clients, which allows for better collisons and extrapolation at the cost of performance.")]
+    [Tooltip("If left checked, will reconcile all clients, which allows for better collisons and extrapolation at the cost of performance.")]
     public bool PredictAllClients = true;
 
     [HideInInspector] public static PredictionManager Singleton { get; private set; }
@@ -72,15 +72,18 @@ public class PredictionManager : NetworkBehaviour
     [HideInInspector] public event Action<List<Message>> OnSendState;
     [HideInInspector] public event Action<Message> OnSendInput;
 
-    void Start() {
+    void Awake() {
         IsReconciling = false;
         DidReconcile = false;
         DidReceiveInputPacket = false;
         DidReceiveStatePacket = false;
-        PredictionTimer.Singleton.OnTick += RunPrediction;
 
         if (Singleton != null && Singleton != this) Destroy(this); 
-        else Singleton = this; 
+        else Singleton = this;
+    }
+
+    void Start() {
+        PredictionTimer.Singleton.OnTick += RunPrediction;
     }
 
     public override void OnDestroy() {
